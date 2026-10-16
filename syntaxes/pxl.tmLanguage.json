@@ -71,15 +71,15 @@
         },
         "element-types": {
             "name": "support.class.widget.pxl",
-            "match": "\\b(label|button|textbox)\\b"
+            "match": "\\b(label|par|button|textbox|textarea)\\b"
         },
         "properties": {
             "name": "entity.other.attribute-name.pxl",
-            "match": "\\b(id|title|width|height|background|iconPath|text|placeholder|x|y|message|options)\\b(?=\\s*:)"
+            "match": "\\b(id|title|width|height|background|iconPath|text|placeholder|x|y|font|fontSize|message|options)\\b(?=\\s*:)"
         },
         "values": {
             "name": "constant.language.pxl",
-            "match": "\\b(YESNO|ARROW|IBEAM|WAIT|CROSS|UPARROW|SIZE|ICON|SIZENWSE|SIZENESW|SIZEWE|SIZENS|SIZEALL|NO|HAND|APPSTARTING|HELP|PIN|PERSON)\\b"
+            "match": "\\b(YESNO|DEFAULT|ARIAL|CALIBRI|CONSOLAS|COURIERNEW|TIMESNEWROMAN|TAHOMA|VERDANA|ARROW|IBEAM|WAIT|CROSS|UPARROW|SIZE|ICON|SIZENWSE|SIZENESW|SIZEWE|SIZENS|SIZEALL|NO|HAND|APPSTARTING|HELP|PIN|PERSON)\\b"
         },
         "types": {
             "name": "storage.type.pxl",

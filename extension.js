@@ -19,10 +19,52 @@ function validate(document) {
 
     for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
         const original = document.lineAt(lineNumber).text;
-        const line = original.trim().replace(/;$/, '').trim();
+        const trimmed = original.trim();
+        const hasTrailingSemicolon = /;\s*$/.test(trimmed);
+        const hasTrailingComma = /,\s*$/.test(trimmed);
+        const line = trimmed.replace(/[;,]\s*$/, '').trim();
 
         if (line === '' || line.startsWith('#')) {
             continue;
+        }
+
+        const isField =
+            /^(id|title|iconPath|text|placeholder|message|options|width|height|x|y|font|fontSize|background)\s*:/.test(line);
+
+        // Fields inside blocks are comma-delimited, while executable
+        // statements and declarations remain semicolon-terminated. A final
+        // field may omit its comma immediately before the closing brace.
+        if (isField) {
+            let nextLine = '';
+            for (let next = lineNumber + 1; next < document.lineCount; next++) {
+                const candidate = document.lineAt(next).text.trim();
+                if (candidate !== '' && !candidate.startsWith('#')) {
+                    nextLine = candidate;
+                    break;
+                }
+            }
+
+            if (hasTrailingSemicolon || (nextLine !== '}' && !hasTrailingComma)) {
+                diagnostic(document, diagnostics, lineNumber, "Expected ',' after the field.");
+            }
+        }
+
+        // Keep block headers and for-loop clauses out of the statement check;
+        // their braces and internal semicolons are structural syntax.
+        const requiresSemicolon =
+            /^switch_view\s*\(.*\)\s*$/.test(line) ||
+            /^[A-Za-z_][A-Za-z0-9_]*\+\+$/.test(line) ||
+            /^(int|short|long)\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*-?\d+$/.test(line) ||
+            /^(float|double)\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*-?\d+(?:\.\d+)?$/.test(line) ||
+            /^bool\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*(true|false)$/.test(line) ||
+            /^char\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*'(?:\\.|[^'\\])'$/.test(line) ||
+            /^String\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*"(?:\\.|[^"\\])*"$/.test(line) ||
+            /^[A-Za-z_][A-Za-z0-9_]*\s*=\s*(?:-?\d+(?:\.\d+)?|true|false|'.'|"(?:\\.|[^"\\])*")$/.test(line) ||
+            /^update\s+[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*=/.test(line) ||
+            /^[A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*\s*=/.test(line);
+
+        if (requiresSemicolon && !hasTrailingSemicolon) {
+            diagnostic(document, diagnostics, lineNumber, "Expected ';' at the end of the statement.");
         }
 
         const withoutStrings = original.replace(/"(?:\\.|[^"\\])*"/g, '""');
@@ -38,11 +80,11 @@ function validate(document) {
             continue;
         }
 
-        if (/^(label|button|textbox)\s+[A-Za-z_][A-Za-z0-9_]*\s*\{$/.test(line)) {
+        if (/^(label|par|button|textbox|textarea)\s+[A-Za-z_][A-Za-z0-9_]*\s*\{$/.test(line)) {
             continue;
         }
 
-        if (/^add\s+(label|button|textbox)\s+[A-Za-z_][A-Za-z0-9_]*\s*\{$/.test(line)) {
+        if (/^add\s+(label|par|button|textbox|textarea)\s+[A-Za-z_][A-Za-z0-9_]*\s*\{$/.test(line)) {
             continue;
         }
 
@@ -83,6 +125,15 @@ function validate(document) {
             continue;
         }
 
+        if (/^[A-Za-z_][A-Za-z0-9_]*\.fontSize\+\+;?$/.test(line)) {
+            continue;
+        }
+
+        if (/^[A-Za-z_][A-Za-z0-9_]*\.fontSize--\s*;?$/.test(line) ||
+            /^[A-Za-z_][A-Za-z0-9_]*--\s*;?$/.test(line)) {
+            continue;
+        }
+
         if (/^(int|short|long)\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*-?\d+;?$/.test(line) ||
             /^(float|double)\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*-?\d+(?:\.\d+)?;?$/.test(line) ||
             /^bool\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*(true|false);?$/.test(line) ||
@@ -108,12 +159,19 @@ function validate(document) {
         }
 
         if (/^[A-Za-z_][A-Za-z0-9_]*\.(text|title|iconPath)\s*=\s*(?:f)?"(?:\\.|[^"\\])*"$/.test(line) ||
-            /^[A-Za-z_][A-Za-z0-9_]*\.(x|y|width|height)\s*=\s*-?\d+$/.test(line) ||
+            /^[A-Za-z_][A-Za-z0-9_]*\.font\s*=\s*(DEFAULT|ARIAL|CALIBRI|CONSOLAS|COURIERNEW|TIMESNEWROMAN|TAHOMA|VERDANA)$/.test(line) ||
+            /^[A-Za-z_][A-Za-z0-9_]*\.fontSize\s*=\s*[1-9]\d+$/.test(line) ||
+            /^[A-Za-z_][A-Za-z0-9_]*\.(x|y|width|height|fontSize)\s*=\s*(?:-?\d+|[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*[+-]\s*-?\d+)$/.test(line) ||
             /^mouse\.shape\s*=\s*(ARROW|IBEAM|WAIT|CROSS|UPARROW|SIZE|ICON|SIZENWSE|SIZENESW|SIZEWE|SIZENS|SIZEALL|NO|HAND|APPSTARTING|HELP|PIN|PERSON)$/.test(line)) {
             continue;
         }
 
         if (/^update\s+[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*=\s*"(?:\\.|[^"\\])*"$/.test(line)) {
+            continue;
+        }
+
+        if (/^update\s+[A-Za-z_][A-Za-z0-9_]*\.font\s*=\s*(DEFAULT|ARIAL|CALIBRI|CONSOLAS|COURIERNEW|TIMESNEWROMAN|TAHOMA|VERDANA)$/.test(line) ||
+            /^update\s+[A-Za-z_][A-Za-z0-9_]*\.(x|y|width|height|fontSize)\s*=\s*(?:-?\d+|[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*[+-]\s*-?\d+)$/.test(line)) {
             continue;
         }
 
@@ -157,6 +215,11 @@ function validate(document) {
             continue;
         }
 
+        if (/^font\s*:\s*(DEFAULT|ARIAL|CALIBRI|CONSOLAS|COURIERNEW|TIMESNEWROMAN|TAHOMA|VERDANA)$/.test(line) ||
+            /^fontSize\s*:\s*[1-9]\d*$/.test(line)) {
+            continue;
+        }
+
         if (/^options\s*:\s*YESNO$/.test(line)) {
             continue;
         }
@@ -179,7 +242,7 @@ function validate(document) {
             continue;
         }
 
-        if (/^(id|title|iconPath|text|placeholder|message|options|width|height|x|y|background)\b/.test(line)) {
+        if (/^(id|title|iconPath|text|placeholder|message|options|width|height|x|y|font|fontSize|background)\b/.test(line)) {
             diagnostic(
                 document,
                 diagnostics,
@@ -217,10 +280,12 @@ const documentation = {
     window: '**window**\n\nDefines the application window and its configuration.',
     id: '**id**\n\nGives a window a unique string identifier. Required when a file contains multiple windows. The window with id `main` opens first.',
     script: '**script**\n\nContains commands that create and configure UI elements.',
-    add: '**add**\n\nAdds a label, button, or `CLOSE_TRIGGER` to the application.',
+    add: '**add**\n\nAdds a label, par, button, textarea, or `CLOSE_TRIGGER` to the application.',
     label: '**label**\n\nCreates a non-clickable text widget.',
+    par: '**par**\n\nCreates a multiline paragraph text widget with wrapping.',
     button: '**button**\n\nCreates a clickable button widget.',
     textbox: '**textbox**\n\nCreates an editable text input. Read its current contents with `inputId.text`.',
+    textarea: '**textarea**\n\nCreates a multiline editable text input. Read its current contents with `inputId.text`.',
     placeholder: '**placeholder**\n\nText shown in an empty textbox. It disappears when the textbox receives input.',
     onclick: '**onclick**\n\nDefines actions that run when a button is clicked.',
     update: '**update**\n\nUpdates a widget or window property. Example: `update greeting.text = "Hello"`.',
@@ -228,6 +293,8 @@ const documentation = {
     iconPath: '**iconPath**\n\nSets the path to the application icon.',
     width: '**width**\n\nSets a window or widget width in pixels.',
     height: '**height**\n\nSets a window or widget height in pixels.',
+    font: '**font**\n\nSets a widget font. Supported constants include `ARIAL`, `CALIBRI`, `CONSOLAS`, `COURIERNEW`, `TIMESNEWROMAN`, `TAHOMA`, and `VERDANA`.',
+    fontSize: '**fontSize**\n\nSets widget text size in pixels.',
     x: '**x**\n\nSets the horizontal position of a widget.',
     y: '**y**\n\nSets the vertical position of a widget.',
     text: '**text**\n\nSets the displayed text for a label or button.',
@@ -274,7 +341,7 @@ const documentation = {
 function findWidgetDocumentation(document, word) {
     const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const pattern = new RegExp(
-        `^\\s*(?:add\\s+)?(label|button)\\s+${escapedWord}\\s*\\{`
+        `^\\s*(?:add\\s+)?(label|par|button|textbox|textarea)\\s+${escapedWord}\\s*\\{`
     );
 
     const lines = document.getText().split(/\r?\n/);
@@ -285,7 +352,15 @@ function findWidgetDocumentation(document, word) {
     }
 
     const declaration = lines[declarationIndex].match(pattern);
-    const type = declaration[1] === 'button' ? 'Button' : 'Label';
+    const type = declaration[1] === 'button'
+        ? 'Button'
+        : declaration[1] === 'par'
+            ? 'Paragraph'
+        : declaration[1] === 'textarea'
+            ? 'Textarea'
+            : declaration[1] === 'textbox'
+                ? 'Textbox'
+                : 'Label';
     const details = [`**${word}**`, `\n${type} widget.`];
     let braceDepth = 1;
 

@@ -1,11 +1,17 @@
 {
   "name": "pixelate",
+  "publisher": "local",
   "displayName": "Pixelate",
   "description": "Syntax highlighting and language support for the Pixelate UI scripting language.",
-  "version": "0.0.1",
+  "version": "0.0.5",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adilevy1011/Pixelate_vscode"
+  },
   "main": "./extension.js",
   "engines": {
-    "vscode": "^1.140.0"
+    "vscode": "^1.80.0"
   },
   "categories": [
     "Programming Languages"

@@ -1,0 +1,8 @@
+# Testing
+local/
+
+# VScode
+debug.log
+
+# Binary files
+*.vsix
