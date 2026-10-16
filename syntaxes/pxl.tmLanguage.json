@@ -1,0 +1,86 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "Pixelate",
+    "scopeName": "source.pxl",
+    "patterns": [
+        { "include": "#comments" },
+        { "include": "#strings" },
+        { "include": "#blocks" },
+        { "include": "#commands" },
+        { "include": "#element-types" },
+        { "include": "#properties" },
+        { "include": "#types" },
+        { "include": "#literals" },
+        { "include": "#numbers" },
+        { "include": "#identifiers" }
+    ],
+    "repository": {
+        "comments": {
+            "name": "comment.line.number-sign.pxl",
+            "match": "#.*$"
+        },
+        "strings": {
+            "name": "string.quoted.double.pxl",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.pxl",
+                    "match": "\\\\(n|t|\\\\|\")"
+                }
+            ]
+        },
+        "blocks": {
+            "name": "keyword.control.block.pxl",
+            "match": "\\b(window|script)\\b"
+        },
+        "commands": {
+            "patterns": [
+                {
+                    "name": "keyword.control.command.pxl",
+                    "match": "\\b(add|update|CLOSE_TRIGGER|if|while|for|trigger|mouse)\\b"
+                },
+                {
+                    "name": "keyword.control.event.pxl",
+                    "match": "\\bonclick\\b"
+                }
+            ]
+        },
+        "element-types": {
+            "name": "support.class.widget.pxl",
+            "match": "\\b(label|button)\\b"
+        },
+        "properties": {
+            "name": "entity.other.attribute-name.pxl",
+            "match": "\\b(title|width|height|background|iconPath|text|x|y|message|options)\\b(?=\\s*:)"
+        },
+        "values": {
+            "name": "constant.language.pxl",
+            "match": "\\b(YESNO|ARROW|IBEAM|WAIT|CROSS|UPARROW|SIZE|ICON|SIZENWSE|SIZENESW|SIZEWE|SIZENS|SIZEALL|NO|HAND|APPSTARTING|HELP|PIN|PERSON)\\b"
+        },
+        "types": {
+            "name": "storage.type.pxl",
+            "match": "\\b(int|short|long|float|double|bool|char|String)\\b"
+        },
+        "literals": {
+            "patterns": [
+                {
+                    "name": "constant.language.boolean.pxl",
+                    "match": "\\b(true|false)\\b"
+                },
+                {
+                    "name": "constant.character.pxl",
+                    "match": "'(?:\\\\.|[^'\\\\])'"
+                }
+            ]
+        },
+        "numbers": {
+            "name": "constant.numeric.pxl",
+            "match": "\\b-?\\d+(?:\\.\\d+)?\\b"
+        },
+        "identifiers": {
+            "name": "variable.other.readwrite.pxl",
+            "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+    }
+}

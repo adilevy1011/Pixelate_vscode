@@ -1,0 +1,56 @@
+{
+  "name": "pixelate",
+  "displayName": "Pixelate",
+  "description": "Syntax highlighting and language support for the Pixelate UI scripting language.",
+  "version": "0.0.1",
+  "main": "./extension.js",
+  "engines": {
+    "vscode": "^1.140.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:pxl"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "pxl",
+      "aliases": ["Pixelate", "pxl"],
+      "extensions": [".pxl"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "pxl",
+      "scopeName": "source.pxl",
+      "path": "./syntaxes/pxl.tmLanguage.json"
+    }],
+    "iconThemes": [{
+      "id": "pixelate-icons",
+      "label": "Pixelate Icons",
+      "path": "./pixelate-icon-theme.json"
+    }],
+    "commands": [{
+      "command": "pixelate.runCurrentFile",
+      "title": "Pixelate: Run Current File",
+      "icon": "$(play)"
+    }],
+    "menus": {
+      "editor/title": [{
+        "command": "pixelate.runCurrentFile",
+        "when": "editorLangId == pxl",
+        "group": "navigation@1"
+      }]
+    },
+    "configuration": {
+      "title": "Pixelate",
+      "properties": {
+        "pixelate.executablePath": {
+          "type": "string",
+          "default": "${workspaceFolder}/pixelate.exe",
+          "description": "Path to the Pixelate runtime executable."
+        }
+      }
+    }
+  }
+}

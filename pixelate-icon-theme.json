@@ -1,0 +1,10 @@
+{
+    "iconDefinitions": {
+        "_pxl": {
+            "iconPath": "./icons/pxl.svg"
+        }
+    },
+    "fileExtensions": {
+        "pxl": "_pxl"
+    }
+}
