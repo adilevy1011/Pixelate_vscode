@@ -1,65 +1,102 @@
-# pixelate README
+# Pixelate for Visual Studio Code
 
-This is the README for your extension "pixelate". After writing up a brief description, we recommend including the following sections.
+VS Code language support for Pixelate, the `.pxl` UI scripting language.
+
+The extension provides syntax highlighting, basic diagnostics, hover documentation, a run command, and Pixelate file icons.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- Syntax highlighting for Pixelate keywords, widgets, properties, variables, literals, comments, and f-strings.
+- Basic diagnostics for missing braces, invalid properties, malformed declarations, and unsupported statements.
+- Hover documentation for blocks, commands, widgets, properties, and mouse options.
+- `Pixelate: Run Current File` command.
+- Play button in the editor title bar for active `.pxl` files.
+- `.pxl` file icons through the included Pixelate icon theme.
+- Automatic bracket and quote pairing.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+The extension requires the Pixelate runtime executable, `pixelate.exe`.
 
-## Extension Settings
+By default, it looks for the runtime at:
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+```text
+${workspaceFolder}/pixelate/pixelate.exe
+```
 
-For example:
+The workspace should usually look like this:
 
-This extension contributes the following settings:
+```text
+project/
+├── pixelate/
+│   └── pixelate.exe
+├── programs/
+│   └── hello.pxl
+└── .vscode/
+```
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+## Running a Pixelate file
 
-## Known Issues
+1. Open the Pixelate project folder in VS Code.
+2. Open a `.pxl` file.
+3. Click the play button in the editor title bar, or run `Pixelate: Run Current File` from the Command Palette.
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Runtime output appears in the `Pixelate` output channel.
 
-## Release Notes
+## Extension settings
 
-Users appreciate release notes as you update your extension.
+### `pixelate.executablePath`
 
-### 1.0.0
+Overrides the location of the Pixelate runtime executable.
 
-Initial release of ...
+```json
+{
+    "pixelate.executablePath": "${workspaceFolder}/pixelate/pixelate.exe"
+}
+```
 
-### 1.0.1
+An absolute path is also supported:
 
-Fixed issue #.
+```json
+{
+    "pixelate.executablePath": "C:/path/to/pixelate.exe"
+}
+```
 
-### 1.1.0
+## Supported file type
 
-Added features X, Y, and Z.
+The extension registers the `pxl` language ID for files ending in `.pxl`.
 
----
+```pxl
+window {
+    title: "My Pixelate App";
+    width: 800;
+    height: 600;
+}
 
-## Working with Markdown
+script {
+    add label greeting {
+        text: "Hello from Pixelate!";
+        x: 40;
+        y: 40;
+        width: 300;
+        height: 35;
+    }
+}
+```
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+## Development
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+To test the extension locally:
 
-## For more information
+1. Open this extension folder in VS Code.
+2. Press `F5` to launch an Extension Development Host.
+3. Open a `.pxl` file in the development host.
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+Changes to `extension.js` may require reloading the Extension Development Host. Grammar changes may require reopening the `.pxl` editor.
 
-**Enjoy!**
+## Scope
+
+This extension provides editor support for Pixelate. The Pixelate runtime and language implementation are maintained in the main project outside this extension folder.
+
+See the main Pixelate repository documentation for the complete language and UI reference.

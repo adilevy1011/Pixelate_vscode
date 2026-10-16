@@ -4,6 +4,7 @@
     "scopeName": "source.pxl",
     "patterns": [
         { "include": "#comments" },
+        { "include": "#formatted-strings" },
         { "include": "#strings" },
         { "include": "#blocks" },
         { "include": "#commands" },
@@ -30,6 +31,28 @@
                 }
             ]
         },
+        "formatted-strings": {
+            "name": "string.quoted.double.pxl",
+            "begin": "\\bf\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.pxl",
+                    "match": "\\\\(n|t|\\\\|\")"
+                },
+                {
+                    "name": "meta.interpolation.pxl",
+                    "begin": "\\{",
+                    "end": "\\}",
+                    "patterns": [
+                        {
+                            "name": "variable.other.readwrite.pxl",
+                            "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)?\\b"
+                        }
+                    ]
+                }
+            ]
+        },
         "blocks": {
             "name": "keyword.control.block.pxl",
             "match": "\\b(window|script)\\b"
@@ -38,7 +61,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.command.pxl",
-                    "match": "\\b(add|update|CLOSE_TRIGGER|if|while|for|trigger|mouse)\\b"
+                    "match": "\\b(add|update|CLOSE_TRIGGER|if|else|while|for|trigger|mouse)\\b"
                 },
                 {
                     "name": "keyword.control.event.pxl",
@@ -48,11 +71,11 @@
         },
         "element-types": {
             "name": "support.class.widget.pxl",
-            "match": "\\b(label|button)\\b"
+            "match": "\\b(label|button|textbox)\\b"
         },
         "properties": {
             "name": "entity.other.attribute-name.pxl",
-            "match": "\\b(title|width|height|background|iconPath|text|x|y|message|options)\\b(?=\\s*:)"
+            "match": "\\b(title|width|height|background|iconPath|text|placeholder|x|y|message|options)\\b(?=\\s*:)"
         },
         "values": {
             "name": "constant.language.pxl",

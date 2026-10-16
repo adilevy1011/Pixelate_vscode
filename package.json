@@ -47,7 +47,7 @@
       "properties": {
         "pixelate.executablePath": {
           "type": "string",
-          "default": "${workspaceFolder}/pixelate.exe",
+          "default": "${workspaceFolder}/pixelate/pixelate.exe",
           "description": "Path to the Pixelate runtime executable."
         }
       }

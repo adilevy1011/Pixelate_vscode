@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const path = require('path');
+const fs = require('fs');
 const { spawn } = require('child_process');
 
 function diagnostic(document, diagnostics, line, message) {
@@ -18,7 +19,7 @@ function validate(document) {
 
     for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
         const original = document.lineAt(lineNumber).text;
-        const line = original.trim();
+        const line = original.trim().replace(/;$/, '').trim();
 
         if (line === '' || line.startsWith('#')) {
             continue;
@@ -37,11 +38,11 @@ function validate(document) {
             continue;
         }
 
-        if (/^(label|button)\s+[A-Za-z_][A-Za-z0-9_]*\s*\{$/.test(line)) {
+        if (/^(label|button|textbox)\s+[A-Za-z_][A-Za-z0-9_]*\s*\{$/.test(line)) {
             continue;
         }
 
-        if (/^add\s+(label|button)\s+[A-Za-z_][A-Za-z0-9_]*\s*\{$/.test(line)) {
+        if (/^add\s+(label|button|textbox)\s+[A-Za-z_][A-Za-z0-9_]*\s*\{$/.test(line)) {
             continue;
         }
 
@@ -53,12 +54,20 @@ function validate(document) {
             continue;
         }
 
+        if (/^else(?:\s+if\s*\(.*\))?\s*\{$/.test(line)) {
+            continue;
+        }
+
+        if (/^\}\s*else(?:\s+if\s*\(.*\))?\s*\{$/.test(line)) {
+            continue;
+        }
+
         if (/^trigger\s*\(\s*mouseMove\s*\)\s*\{$/.test(line) ||
             /^trigger\s*\(\s*[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*(==|!=|<=|>=|<|>)\s*(?:[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?|-?\d+(?:\.\d+)?|true|false)\s*\)\s*\{$/.test(line)) {
             continue;
         }
 
-        if (/^(if|while)\s*\(\s*[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*(==|!=|<=|>=|<|>)\s*(?:[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?|-?\d+(?:\.\d+)?|true|false|"(?:\\.|[^"\\])*")\s*\)\s*\{$/.test(line)) {
+        if (/^(if|while)\s*\(\s*(?:!\s*)?[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?(?:\s*(==|!=|<=|>=|<|>)\s*(?:[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?|-?\d+(?:\.\d+)?|true|false|"(?:\\.|[^"\\])*")\s*)?\)\s*\{$/.test(line)) {
             continue;
         }
 
@@ -75,6 +84,10 @@ function validate(document) {
             /^bool\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*(true|false);?$/.test(line) ||
             /^char\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*'(?:\\.|[^'\\])';?$/.test(line) ||
             /^String\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*"(?:\\.|[^"\\])*";?$/.test(line)) {
+            continue;
+        }
+
+        if (/^[A-Za-z_][A-Za-z0-9_]*\s*=\s*(?:-?\d+(?:\.\d+)?|true|false|'.'|"(?:\\.|[^"\\])*");?$/.test(line)) {
             continue;
         }
 
@@ -136,7 +149,7 @@ function validate(document) {
             continue;
         }
 
-        if (/^(title|iconPath|text|message)\s*:\s*"(?:\\.|[^"\\])*"$/.test(line)) {
+        if (/^(title|iconPath|text|placeholder|message)\s*:\s*(?:f)?"(?:\\.|[^"\\])*"$/.test(line)) {
             continue;
         }
 
@@ -162,7 +175,7 @@ function validate(document) {
             continue;
         }
 
-        if (/^(title|iconPath|text|message|options|width|height|x|y|background)\b/.test(line)) {
+        if (/^(title|iconPath|text|placeholder|message|options|width|height|x|y|background)\b/.test(line)) {
             diagnostic(
                 document,
                 diagnostics,
@@ -338,9 +351,18 @@ async function runCurrentFile(context, output) {
     let executable = expandWorkspaceVariable(configuredPath);
 
     if (!configuredPath || configuredPath === '${workspaceFolder}/pixelate.exe') {
-        if (!vscode.workspace.workspaceFolders) {
-            executable = path.join(context.extensionPath, '..', 'pixelate.exe');
-        }
+        const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        const candidates = workspace
+            ? [
+                path.join(workspace, 'pixelate.exe'),
+                path.join(workspace, 'pixelate', 'pixelate.exe')
+            ]
+            : [
+                path.join(context.extensionPath, '..', '..', 'pixelate', 'pixelate.exe'),
+                path.join(context.extensionPath, '..', 'pixelate.exe')
+            ];
+
+        executable = candidates.find(candidate => fs.existsSync(candidate)) || candidates[0];
     }
 
     const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
