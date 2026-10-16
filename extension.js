@@ -54,6 +54,10 @@ function validate(document) {
             continue;
         }
 
+        if (/^switch_view\s*\(\s*(?:"(?:\\.|[^"\\])*"|[A-Za-z_][A-Za-z0-9_]*)(?:\s*,\s*destroy_window\s*=\s*(?:true|false))?\s*\)\s*$/.test(line)) {
+            continue;
+        }
+
         if (/^else(?:\s+if\s*\(.*\))?\s*\{$/.test(line)) {
             continue;
         }
@@ -149,7 +153,7 @@ function validate(document) {
             continue;
         }
 
-        if (/^(title|iconPath|text|placeholder|message)\s*:\s*(?:f)?"(?:\\.|[^"\\])*"$/.test(line)) {
+        if (/^(id|title|iconPath|text|placeholder|message)\s*:\s*(?:f)?"(?:\\.|[^"\\])*"$/.test(line)) {
             continue;
         }
 
@@ -175,7 +179,7 @@ function validate(document) {
             continue;
         }
 
-        if (/^(title|iconPath|text|placeholder|message|options|width|height|x|y|background)\b/.test(line)) {
+        if (/^(id|title|iconPath|text|placeholder|message|options|width|height|x|y|background)\b/.test(line)) {
             diagnostic(
                 document,
                 diagnostics,
@@ -211,10 +215,13 @@ function validate(document) {
 
 const documentation = {
     window: '**window**\n\nDefines the application window and its configuration.',
+    id: '**id**\n\nGives a window a unique string identifier. Required when a file contains multiple windows. The window with id `main` opens first.',
     script: '**script**\n\nContains commands that create and configure UI elements.',
     add: '**add**\n\nAdds a label, button, or `CLOSE_TRIGGER` to the application.',
     label: '**label**\n\nCreates a non-clickable text widget.',
     button: '**button**\n\nCreates a clickable button widget.',
+    textbox: '**textbox**\n\nCreates an editable text input. Read its current contents with `inputId.text`.',
+    placeholder: '**placeholder**\n\nText shown in an empty textbox. It disappears when the textbox receives input.',
     onclick: '**onclick**\n\nDefines actions that run when a button is clicked.',
     update: '**update**\n\nUpdates a widget or window property. Example: `update greeting.text = "Hello"`.',
     title: '**title**\n\nSets the window title text.',
@@ -240,6 +247,8 @@ const documentation = {
     if: '**if**\n\nRuns a block when a comparison is true.',
     while: '**while**\n\nRepeats a block while a comparison is true.',
     for: '**for**\n\nRepeats a block using a numeric initializer, condition, and `++` increment.',
+    switch_view: '**switch_view**\n\nOpens another identified window. The current window is destroyed by default. Use `switch_view("settings", destroy_window = false);` to keep it open.\n\nExample: `switch_view("settings");`',
+    destroy_window: '**destroy_window**\n\nOptional `switch_view` argument. Set it to `false` to keep the current window open while opening the destination window.',
     trigger: '**trigger**\n\nRuns a block when a condition becomes true or when a `mouseMove` event occurs.',
     mouse: '**mouse**\n\nProvides `mouse.x` and `mouse.y`, and supports cursor shape updates.',
     ARROW: '**ARROW**\n\nThe standard arrow cursor.',
@@ -348,22 +357,9 @@ async function runCurrentFile(context, output) {
         .getConfiguration('pixelate')
         .get('executablePath');
 
-    let executable = expandWorkspaceVariable(configuredPath);
-
-    if (!configuredPath || configuredPath === '${workspaceFolder}/pixelate.exe') {
-        const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-        const candidates = workspace
-            ? [
-                path.join(workspace, 'pixelate.exe'),
-                path.join(workspace, 'pixelate', 'pixelate.exe')
-            ]
-            : [
-                path.join(context.extensionPath, '..', '..', 'pixelate', 'pixelate.exe'),
-                path.join(context.extensionPath, '..', 'pixelate.exe')
-            ];
-
-        executable = candidates.find(candidate => fs.existsSync(candidate)) || candidates[0];
-    }
+    // Use the configured command directly. The default is pixelate.exe,
+    // which lets the operating system resolve the executable through PATH.
+    const executable = configuredPath || 'pixelate.exe';
 
     const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     const cwd = workspace || path.dirname(editor.document.fileName);

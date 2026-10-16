@@ -61,7 +61,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.command.pxl",
-                    "match": "\\b(add|update|CLOSE_TRIGGER|if|else|while|for|trigger|mouse)\\b"
+                    "match": "\\b(add|update|switch_view|CLOSE_TRIGGER|if|else|while|for|trigger|mouse)\\b"
                 },
                 {
                     "name": "keyword.control.event.pxl",
@@ -75,7 +75,7 @@
         },
         "properties": {
             "name": "entity.other.attribute-name.pxl",
-            "match": "\\b(title|width|height|background|iconPath|text|placeholder|x|y|message|options)\\b(?=\\s*:)"
+            "match": "\\b(id|title|width|height|background|iconPath|text|placeholder|x|y|message|options)\\b(?=\\s*:)"
         },
         "values": {
             "name": "constant.language.pxl",
