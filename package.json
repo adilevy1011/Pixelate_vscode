@@ -3,7 +3,7 @@
   "publisher": "local",
   "displayName": "Pixelate",
   "description": "Syntax highlighting and language support for the Pixelate UI scripting language.",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "license": "MIT",
   "repository": {
     "type": "git",

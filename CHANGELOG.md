@@ -6,4 +6,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
-- Initial release
+- Updated inline diagnostics and hover documentation for shapes, keyboard
+  triggers, compound conditions, angle/radius properties, and coordinate
+  increments.
