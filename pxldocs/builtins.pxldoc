@@ -1,0 +1,492 @@
+---
+id: window
+name: Window
+kind: block
+---
+Defines the application window and its configuration.
+
+---
+id: id
+name: ID
+kind: property
+---
+Gives a window a unique string identifier. Required when a file contains multiple windows. The window with id `main` opens first.
+
+---
+id: script
+name: Script
+kind: block
+---
+Contains commands that create and configure UI elements.
+
+---
+id: add
+name: Add
+kind: command
+---
+Adds a label, par, button, textbox, textarea, `rect`, `circle`, `triangle`, or `CLOSE_TRIGGER` to the application.
+
+---
+id: label
+name: Label
+kind: element
+---
+Creates a non-clickable text widget.
+
+---
+id: par
+name: Paragraph
+kind: element
+---
+Creates a multiline paragraph text widget with wrapping.
+
+---
+id: button
+name: Button
+kind: element
+---
+Creates a clickable button widget.
+
+---
+id: textbox
+name: Textbox
+kind: element
+---
+Creates an editable text input. Read its current contents with `inputId.text`.
+
+---
+id: textarea
+name: Textarea
+kind: element
+---
+Creates a multiline editable text input. Read its current contents with `inputId.text`.
+
+---
+id: rect
+name: Rectangle
+kind: element
+---
+Creates a filled rectangle with `x`, `y`, `width`, `height`, and clockwise `angle` in degrees.
+
+---
+id: circle
+name: Circle
+kind: element
+---
+Creates a filled circle. `x` and `y` specify its center; `radius` defaults to 10.
+
+---
+id: triangle
+name: Triangle
+kind: element
+---
+Creates a filled triangle from `p1`, `p2`, and `p3` coordinate pairs. Omit all three for an upward equilateral triangle with side length about 10. When supplied with both `x` and `y`, the triangle is placed by its centroid. Its `angle` rotates it clockwise around that centroid.
+
+---
+id: placeholder
+name: Placeholder
+kind: property
+---
+Text shown in an empty textbox. It disappears when the textbox receives input.
+
+---
+id: onclick
+name: On Click
+kind: block
+---
+Defines actions that run when a button is clicked.
+
+---
+id: update
+name: Update
+kind: command
+---
+Updates a widget or window property. Example: `update greeting.text = "Hello"`.
+
+---
+id: title
+name: Title
+kind: property
+---
+Sets the window title text.
+
+---
+id: iconPath
+name: Icon Path
+kind: property
+---
+Sets the path to the application icon.
+
+---
+id: width
+name: Width
+kind: property
+---
+Sets a window or widget width in pixels.
+
+---
+id: height
+name: Height
+kind: property
+---
+Sets a window or widget height in pixels.
+
+---
+id: font
+name: Font
+kind: property
+---
+Sets a widget font. Supported constants include `ARIAL`, `CALIBRI`, `CONSOLAS`, `COURIERNEW`, `TIMESNEWROMAN`, `TAHOMA`, and `VERDANA`.
+
+---
+id: fontSize
+name: Font Size
+kind: property
+---
+Sets widget text size in pixels.
+
+---
+id: angle
+name: Angle
+kind: property
+---
+Sets a rectangle or triangle rotation in clockwise degrees.
+
+---
+id: radius
+name: Radius
+kind: property
+---
+Sets a circle radius. Use `circleId.radius++` or `circleId.radius--` to change it incrementally.
+
+---
+id: p1
+name: Point 1
+kind: property
+---
+Triangle point one, written as `(x, y)`.
+
+---
+id: p2
+name: Point 2
+kind: property
+---
+Triangle point two, written as `(x, y)`.
+
+---
+id: p3
+name: Point 3
+kind: property
+---
+Triangle point three, written as `(x, y)`.
+
+---
+id: x
+name: X Position
+kind: property
+---
+Sets the horizontal position of a widget.
+
+---
+id: y
+name: Y Position
+kind: property
+---
+Sets the vertical position of a widget.
+
+---
+id: text
+name: Text
+kind: property
+---
+Sets the displayed text for a label or button.
+
+---
+id: background
+name: Background
+kind: property
+---
+Sets an RGB background color. Each channel must be between 0 and 255.
+
+---
+id: CLOSE_TRIGGER
+name: Close Trigger
+kind: command
+---
+Adds an optional Yes/No confirmation dialog when the window closes.
+
+---
+id: message
+name: Message
+kind: property
+---
+Sets the close-confirmation message.
+
+---
+id: options
+name: Options
+kind: property
+---
+Sets close-confirmation options. The currently supported value is `YESNO`.
+
+---
+id: YESNO
+name: Yes/No
+kind: constant
+---
+Displays Yes and No buttons in a close-confirmation dialog.
+
+---
+id: int
+name: Integer
+kind: type
+---
+Declares a whole-number variable.
+
+---
+id: short
+name: Short Integer
+kind: type
+---
+Declares a small whole-number variable.
+
+---
+id: long
+name: Long Integer
+kind: type
+---
+Declares a large whole-number variable.
+
+---
+id: float
+name: Float
+kind: type
+---
+Declares a single-precision decimal variable.
+
+---
+id: double
+name: Double
+kind: type
+---
+Declares a double-precision decimal variable.
+
+---
+id: bool
+name: Boolean
+kind: type
+---
+Declares a `true` or `false` variable.
+
+---
+id: char
+name: Character
+kind: type
+---
+Declares a single-character variable.
+
+---
+id: String
+name: String
+kind: type
+---
+Declares a text variable.
+
+---
+id: if
+name: If
+kind: statement
+---
+Runs a block when a condition is true. Conditions support `&&`, `||`, `!`, comparisons, and parentheses.
+
+---
+id: while
+name: While
+kind: statement
+---
+Repeats a block while a condition is true. Conditions support `&&`, `||`, `!`, comparisons, and parentheses.
+
+---
+id: for
+name: For
+kind: statement
+---
+Repeats a block using a numeric initializer, condition, and `++` increment.
+
+---
+id: switch_view
+name: Switch View
+kind: command
+---
+Opens another identified window. The current window is destroyed by default. Use `switch_view("settings", destroy_window = false);` to keep it open.
+
+Example: `switch_view("settings");`
+
+---
+id: destroy_window
+name: Destroy Window
+kind: argument
+---
+Optional `switch_view` argument. Set it to `false` to keep the current window open while opening the destination window.
+
+---
+id: trigger
+name: Trigger
+kind: statement
+---
+Runs a block when a condition becomes true, when `mouseMove` occurs, or when `onkey("a")`/`onkeyci("a")` receives a key.
+
+## Special Triggers
+
+Setting `trigger(mouseMove){}` is a special trigger that runs every time a mouse movement is detected.
+
+To set keyboard triggers:
+
+`trigger(onkey("a"))/trigger(onkey("a"))` runs every time the key is pressed.
+
+---
+id: onkey
+name: On Key
+kind: function
+---
+Triggers on an exact, case-sensitive key. Named keys include `space`, `esc`, `enter`, `shift`, `alt`, `up`, `down`, `left`, `right`, and `tab`.
+
+---
+id: onkeyci
+name: On Key (Case Insensitive)
+kind: function
+---
+Triggers on a key without distinguishing upper and lower case.
+
+---
+id: mouse
+name: Mouse
+kind: object
+---
+Provides `mouse.x` and `mouse.y`, and supports cursor shape updates.
+
+---
+id: ARROW
+name: Arrow Cursor
+kind: constant
+---
+The standard arrow cursor.
+
+---
+id: IBEAM
+name: I-Beam Cursor
+kind: constant
+---
+The text-selection cursor.
+
+---
+id: WAIT
+name: Wait Cursor
+kind: constant
+---
+The busy/wait cursor.
+
+---
+id: CROSS
+name: Cross Cursor
+kind: constant
+---
+The crosshair cursor.
+
+---
+id: UPARROW
+name: Up Arrow Cursor
+kind: constant
+---
+The vertical arrow cursor.
+
+---
+id: SIZE
+name: Resize Cursor
+kind: constant
+---
+The all-direction resize cursor.
+
+---
+id: ICON
+name: Icon Cursor
+kind: constant
+---
+The legacy icon cursor.
+
+---
+id: SIZENWSE
+name: Northwest/Southeast Resize Cursor
+kind: constant
+---
+Diagonal resize cursor.
+
+---
+id: SIZENESW
+name: Northeast/Southwest Resize Cursor
+kind: constant
+---
+Diagonal resize cursor.
+
+---
+id: SIZEWE
+name: Horizontal Resize Cursor
+kind: constant
+---
+Horizontal resize cursor.
+
+---
+id: SIZENS
+name: Vertical Resize Cursor
+kind: constant
+---
+Vertical resize cursor.
+
+---
+id: SIZEALL
+name: Move Cursor
+kind: constant
+---
+Move cursor.
+
+---
+id: NO
+name: Unavailable Cursor
+kind: constant
+---
+The unavailable cursor.
+
+---
+id: HAND
+name: Hand Cursor
+kind: constant
+---
+The hand cursor.
+
+---
+id: APPSTARTING
+name: App Starting Cursor
+kind: constant
+---
+The arrow-plus-busy cursor.
+
+---
+id: HELP
+name: Help Cursor
+kind: constant
+---
+The help cursor.
+
+---
+id: PIN
+name: Pin Cursor
+kind: constant
+---
+The pin cursor when supported by Windows.
+
+---
+id: PERSON
+name: Person Cursor
+kind: constant
+---
+The person cursor when supported by Windows.

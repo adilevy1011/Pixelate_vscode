@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
 function diagnostic(document, diagnostics, line, message) {
     const text = document.lineAt(line).text;
@@ -312,77 +312,107 @@ function validate(document) {
     return diagnostics;
 }
 
-const documentation = {
-    window: '**window**\n\nDefines the application window and its configuration.',
-    id: '**id**\n\nGives a window a unique string identifier. Required when a file contains multiple windows. The window with id `main` opens first.',
-    script: '**script**\n\nContains commands that create and configure UI elements.',
-    add: '**add**\n\nAdds a label, par, button, textbox, textarea, `rect`, `circle`, `triangle`, or `CLOSE_TRIGGER` to the application.',
-    label: '**label**\n\nCreates a non-clickable text widget.',
-    par: '**par**\n\nCreates a multiline paragraph text widget with wrapping.',
-    button: '**button**\n\nCreates a clickable button widget.',
-    textbox: '**textbox**\n\nCreates an editable text input. Read its current contents with `inputId.text`.',
-    textarea: '**textarea**\n\nCreates a multiline editable text input. Read its current contents with `inputId.text`.',
-    rect: '**rect**\n\nCreates a filled rectangle with `x`, `y`, `width`, `height`, and clockwise `angle` in degrees.',
-    circle: '**circle**\n\nCreates a filled circle. `x` and `y` specify its center; `radius` defaults to 10.',
-    triangle: '**triangle**\n\nCreates a filled triangle from `p1`, `p2`, and `p3` coordinate pairs. Omit all three for an upward equilateral triangle with side length about 10. When supplied with both `x` and `y`, the triangle is placed by its centroid. Its `angle` rotates it clockwise around that centroid.',
-    placeholder: '**placeholder**\n\nText shown in an empty textbox. It disappears when the textbox receives input.',
-    onclick: '**onclick**\n\nDefines actions that run when a button is clicked.',
-    update: '**update**\n\nUpdates a widget or window property. Example: `update greeting.text = "Hello"`.',
-    title: '**title**\n\nSets the window title text.',
-    iconPath: '**iconPath**\n\nSets the path to the application icon.',
-    width: '**width**\n\nSets a window or widget width in pixels.',
-    height: '**height**\n\nSets a window or widget height in pixels.',
-    font: '**font**\n\nSets a widget font. Supported constants include `ARIAL`, `CALIBRI`, `CONSOLAS`, `COURIERNEW`, `TIMESNEWROMAN`, `TAHOMA`, and `VERDANA`.',
-    fontSize: '**fontSize**\n\nSets widget text size in pixels.',
-    angle: '**angle**\n\nSets a rectangle or triangle rotation in clockwise degrees.',
-    radius: '**radius**\n\nSets a circle radius. Use `circleId.radius++` or `circleId.radius--` to change it incrementally.',
-    p1: '**p1**\n\nTriangle point one, written as `(x, y)`.',
-    p2: '**p2**\n\nTriangle point two, written as `(x, y)`.',
-    p3: '**p3**\n\nTriangle point three, written as `(x, y)`.',
-    x: '**x**\n\nSets the horizontal position of a widget.',
-    y: '**y**\n\nSets the vertical position of a widget.',
-    text: '**text**\n\nSets the displayed text for a label or button.',
-    background: '**background**\n\nSets an RGB background color. Each channel must be between 0 and 255.',
-    CLOSE_TRIGGER: '**CLOSE_TRIGGER**\n\nAdds an optional Yes/No confirmation dialog when the window closes.',
-    message: '**message**\n\nSets the close-confirmation message.',
-    options: '**options**\n\nSets close-confirmation options. The currently supported value is `YESNO`.',
-    YESNO: '**YESNO**\n\nDisplays Yes and No buttons in a close-confirmation dialog.',
-    int: '**int**\n\nDeclares a whole-number variable.',
-    short: '**short**\n\nDeclares a small whole-number variable.',
-    long: '**long**\n\nDeclares a large whole-number variable.',
-    float: '**float**\n\nDeclares a single-precision decimal variable.',
-    double: '**double**\n\nDeclares a double-precision decimal variable.',
-    bool: '**bool**\n\nDeclares a `true` or `false` variable.',
-    char: '**char**\n\nDeclares a single-character variable.',
-    String: '**String**\n\nDeclares a text variable.',
-    if: '**if**\n\nRuns a block when a condition is true. Conditions support `&&`, `||`, `!`, comparisons, and parentheses.',
-    while: '**while**\n\nRepeats a block while a condition is true. Conditions support `&&`, `||`, `!`, comparisons, and parentheses.',
-    for: '**for**\n\nRepeats a block using a numeric initializer, condition, and `++` increment.',
-    switch_view: '**switch_view**\n\nOpens another identified window. The current window is destroyed by default. Use `switch_view("settings", destroy_window = false);` to keep it open.\n\nExample: `switch_view("settings");`',
-    destroy_window: '**destroy_window**\n\nOptional `switch_view` argument. Set it to `false` to keep the current window open while opening the destination window.',
-    trigger: '**trigger**\n\nRuns a block when a condition becomes true, when `mouseMove` occurs, or when `onkey("a")`/`onkeyci("a")` receives a key.',
-    onkey: '**onkey**\n\nTriggers on an exact, case-sensitive key. Named keys include `space`, `esc`, `enter`, `shift`, `alt`, `up`, `down`, `left`, `right`, and `tab`.',
-    onkeyci: '**onkeyci**\n\nTriggers on a key without distinguishing upper and lower case.',
-    mouse: '**mouse**\n\nProvides `mouse.x` and `mouse.y`, and supports cursor shape updates.',
-    ARROW: '**ARROW**\n\nThe standard arrow cursor.',
-    IBEAM: '**IBEAM**\n\nThe text-selection cursor.',
-    WAIT: '**WAIT**\n\nThe busy/wait cursor.',
-    CROSS: '**CROSS**\n\nThe crosshair cursor.',
-    UPARROW: '**UPARROW**\n\nThe vertical arrow cursor.',
-    SIZE: '**SIZE**\n\nThe all-direction resize cursor.',
-    ICON: '**ICON**\n\nThe legacy icon cursor.',
-    SIZENWSE: '**SIZENWSE**\n\nDiagonal resize cursor.',
-    SIZENESW: '**SIZENESW**\n\nDiagonal resize cursor.',
-    SIZEWE: '**SIZEWE**\n\nHorizontal resize cursor.',
-    SIZENS: '**SIZENS**\n\nVertical resize cursor.',
-    SIZEALL: '**SIZEALL**\n\nMove cursor.',
-    NO: '**NO**\n\nThe unavailable cursor.',
-    HAND: '**HAND**\n\nThe hand cursor.',
-    APPSTARTING: '**APPSTARTING**\n\nThe arrow-plus-busy cursor.',
-    HELP: '**HELP**\n\nThe help cursor.',
-    PIN: '**PIN**\n\nThe pin cursor when supported by Windows.',
-    PERSON: '**PERSON**\n\nThe person cursor when supported by Windows.'
-};
+function parsePxldocFile(source, fileName) {
+    const entries = [];
+    // A record separator must be followed by an id header. This keeps normal
+    // Markdown horizontal rules inside the documentation body intact.
+    const recordPattern = /^---\r?\n(?=id:\s*)([\s\S]*?)\r?\n---\r?\n([\s\S]*?)(?=^---\r?\n(?=id:\s*)|(?![\s\S]))/gm;
+    let match;
+
+    while ((match = recordPattern.exec(source)) !== null) {
+        const metadata = {};
+        for (const line of match[1].split(/\r?\n/)) {
+            const separator = line.indexOf(':');
+            if (separator === -1) {
+                continue;
+            }
+
+            const key = line.slice(0, separator).trim();
+            const value = line.slice(separator + 1).trim();
+            if (key) {
+                metadata[key] = value;
+            }
+        }
+
+        if (!metadata.id || !metadata.name) {
+            throw new Error(`${fileName}: every entry needs id and name metadata.`);
+        }
+
+        entries.push({
+            id: metadata.id,
+            name: metadata.name,
+            kind: metadata.kind || 'keyword',
+            docs: match[2].trim()
+        });
+    }
+
+    if (entries.length === 0) {
+        throw new Error(`${fileName}: no .pxldoc entries found.`);
+    }
+
+    return entries;
+}
+
+function loadDocumentation(context) {
+    const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    const packagedDirectory = path.join(context.extensionPath, 'pxldocs');
+    const directories = [
+        // Load the packaged copy first. Workspace documentation is the
+        // authoritative override during development.
+        packagedDirectory,
+        workspace && path.join(workspace, 'pxldocs'),
+        workspace && path.join(workspace, 'pixelate', 'pxldocs'),
+    ].filter(Boolean);
+    const documentation = new Map();
+
+    const configuredPath = vscode.workspace
+        .getConfiguration('pixelate')
+        .get('executablePath');
+    const executable = configuredPath || 'pixelate.exe';
+    const embedded = spawnSync(executable, ['--docs'], {
+        cwd: workspace || context.extensionPath,
+        encoding: 'utf8',
+        timeout: 2000,
+        windowsHide: true
+    });
+
+    if (!embedded.error && embedded.status === 0 && embedded.stdout) {
+        try {
+            for (const entry of parsePxldocFile(embedded.stdout, `${executable} --docs`)) {
+                documentation.set(entry.id, entry);
+            }
+        } catch (error) {
+            console.warn(`Could not load embedded Pixelate documentation: ${error.message}`);
+        }
+    }
+
+    for (const directory of directories) {
+        if (!fs.existsSync(directory)) {
+            continue;
+        }
+
+        for (const fileName of fs.readdirSync(directory).filter(name => name.endsWith('.pxldoc'))) {
+            const filePath = path.join(directory, fileName);
+            try {
+                for (const entry of parsePxldocFile(fs.readFileSync(filePath, 'utf8'), fileName)) {
+                    // Embedded runtime docs take precedence over the packaged
+                    // fallback, while workspace docs remain the final override.
+                    if (directory === packagedDirectory && documentation.has(entry.id)) {
+                        continue;
+                    }
+                    if (documentation.has(entry.id)) {
+                        console.warn(`Duplicate Pixelate documentation id: ${entry.id}. Using ${filePath}.`);
+                    }
+                    documentation.set(entry.id, entry);
+                }
+            } catch (error) {
+                console.warn(`Could not load Pixelate documentation from ${filePath}: ${error.message}`);
+            }
+        }
+    }
+
+    return documentation;
+}
 
 function findWidgetDocumentation(document, word) {
     const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -436,7 +466,7 @@ function findWidgetDocumentation(document, word) {
     return details.join('');
 }
 
-function provideHover(document, position) {
+function provideHover(document, position, documentation) {
     const range = document.getWordRangeAtPosition(
         position,
         /[A-Za-z_][A-Za-z0-9_]*/
@@ -447,8 +477,10 @@ function provideHover(document, position) {
     }
 
     const word = document.getText(range);
-    const markdown = documentation[word] ||
-        findWidgetDocumentation(document, word);
+    const entry = documentation.get(word);
+    const markdown = entry
+        ? `## ${entry.name}\n\n${entry.docs}`
+        : findWidgetDocumentation(document, word);
 
     if (!markdown) {
         return undefined;
@@ -518,10 +550,29 @@ async function runCurrentFile(context, output) {
 function activate(context) {
     const diagnostics = vscode.languages.createDiagnosticCollection('pxl');
     const output = vscode.window.createOutputChannel('Pixelate');
+    let documentation = loadDocumentation(context);
     const hoverProvider = vscode.languages.registerHoverProvider(
         'pxl',
-        { provideHover }
+        { provideHover: (document, position) => provideHover(document, position, documentation) }
     );
+
+    const reloadDocumentation = () => {
+        documentation = loadDocumentation(context);
+    };
+
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (workspaceFolder) {
+        const documentationWatcher = vscode.workspace.createFileSystemWatcher(
+            new vscode.RelativePattern(workspaceFolder, '**/pxldocs/*.pxldoc')
+        );
+
+        context.subscriptions.push(
+            documentationWatcher,
+            documentationWatcher.onDidCreate(reloadDocumentation),
+            documentationWatcher.onDidChange(reloadDocumentation),
+            documentationWatcher.onDidDelete(reloadDocumentation)
+        );
+    }
 
     function refresh(document) {
         if (document.languageId === 'pxl') {
